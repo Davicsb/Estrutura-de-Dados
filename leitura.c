@@ -41,6 +41,7 @@ int main(){
     char nomeArquivo[1024];
     fgets(nomeArquivo, sizeof(nomeArquivo), stdin);
     nomeArquivo[strcspn(nomeArquivo, "\n")] = 0;
+    //talvez eu nao use o fgets por causa desse \n no final q tem q tirar
 
     //printf("%s\n", nomeArquivo);
     
@@ -51,7 +52,7 @@ int main(){
         exit(-1);
     }
 
-    //cria o nome do arquivo de saída, (nome do arquivo).supla < extensão provisoria hehehehehehe
+    //cria o nome do arquivo de saída, (nome do arquivo).supla <-- extensão provisoria hehehehehehe
     char nomeMudado[1024];
     mudar(nomeArquivo, nomeMudado);
 
@@ -74,6 +75,8 @@ int main(){
 
     //printf("O arquivo tem %ld bytes", tamanhoArquivo);
 
+    //vai alocar o espaço suficiente pra o arquivo inteiro
+    //agora será q lista encadeada seria melhor ou nem?
     unsigned char* dados = (unsigned char*) malloc(tamanhoArquivo);
 
     if(dados == NULL){
@@ -85,8 +88,10 @@ int main(){
     fread(dados, 1, tamanhoArquivo, arquivo);
 
     //copia para a saída (nome do arquivo).supla
+    //como o arquivo é só uma cópia com uma extensão diferente, você pode alterar o .supla pra a extensão original e o arquivo vai ser o mesmo
     fwrite(dados, 1, tamanhoArquivo, saida);
 
+    free(dados);
     fclose(arquivo);
     fclose(saida);
 

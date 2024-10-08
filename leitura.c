@@ -39,9 +39,8 @@ int main(){
     printf("Qual o nome do arquivo? (inclua sua extensão)\n");
 
     char nomeArquivo[1024];
-    fgets(nomeArquivo, sizeof(nomeArquivo), stdin);
-    nomeArquivo[strcspn(nomeArquivo, "\n")] = 0;
-    //talvez eu nao use o fgets por causa desse \n no final q tem q tirar
+    scanf(" %[^\n]", nomeArquivo);
+    //tirei o fgets
 
     //printf("%s\n", nomeArquivo);
     

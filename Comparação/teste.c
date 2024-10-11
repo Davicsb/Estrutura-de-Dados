@@ -3,7 +3,8 @@
 #include <string.h>
 
 // CÓDIGO FILA DE PRIORIDADE SEM HEAPS - Ordenada da maior prioridade para menor
-// Parte Sem Heaps
+
+// PARTE SEM HEAP
 typedef struct node{
     int item;
     struct node *next;
@@ -32,54 +33,32 @@ int IsEmptySemHeaps(fpSemHeaps *Fila){
 }
 
 // Insere um novo nó de prioridade, da maior para menor, na fila sem heaps
-void EnqueueSemHeaps(fpSemHeaps *Fila, int item){
+int EnqueueSemHeaps(fpSemHeaps *Fila, int item){
+    int comparacoes = 0;
     node *NovoNo = (node*)malloc(sizeof(node)); // Aloca o Nó da fila
     NovoNo->item = item; // Insere o item/prioridade da fila
     if (IsEmptySemHeaps(Fila)|| item > Fila->head->item ) // Se a fila estiver vazia, ou o primeiro item for o maior inserimos no começo da fila
     {
         NovoNo->next = Fila->head; // Aponta para NULL ou o próximo nó
         Fila->head = NovoNo; // A cabeça se torna o primeiro nó já que é o maior
+        return comparacoes;
     }
     else
     {
         node *atual = Fila->head; // Cria um nó auxiliar para navegar na fila
         while (atual->next != NULL && atual->next->item > item)
         {
+            comparacoes +=1;
             atual = atual->next; // Enquando o próximo não for o final da fila ou o próximo nó for prioridade maior pula para o próximo nó
         }
         NovoNo->next = atual->next; // O próximo item será o próximo do auxiliar, já que o item do próximo é menor
         atual->next = NovoNo; // O nó maior que o NvoNo vai apontar para ele, que é o próximo maior
+        return comparacoes;
     }
 }
 
-// Conta quantas comparações são feitas para achar um nó especifico na fila sem heaps
-int AcharNoSemHeaps(fpSemHeaps *Fila, int item){
-    int comparacoes = 1;
-    if (IsEmptySemHeaps(Fila))
-    {
-        return -1; // Se for o final da fila retorna -1, já que não encontramos o item
-    }
-    else
-    {
-        node *atual = Fila->head; // Cria um nó auxiliar para navegar na fila
-        while (atual != NULL && atual->item != item) 
-        {
-            comparacoes += 1; // Quando pulamos o nó fazemos uma comparação
-            atual = atual->next; // Enquando o próximo não for o final da fila ou o próximo nó for quem procuramos pula para o próximo nó
-        }
-        if (atual == NULL)
-        {
-            return -1; // Se for o final da fila retorna -1, já que não encontramos o item, chegamos no final da lista
-        }
-        else if (atual->item == item)
-        {
-            return comparacoes; // Achamos o nó
-        }
-    }
-}
-
-
-// Imprime uam fila sem heaps
+/*
+// Imprime uam fila sem heaps - Usada na conferencia do código
 void ImprimirFilaSemHeaps(fpSemHeaps *Fila){
     node *aux = Fila->head; // Cria um nó auxiliar para navegar na fila
     while (aux != NULL)
@@ -88,10 +67,11 @@ void ImprimirFilaSemHeaps(fpSemHeaps *Fila){
         aux = aux->next;
     }
     printf("\n");
-} 
+}
+*/
 
-
-// Retorna o tamanho da fila sem heaps que é igual ao tamanho da fila com heaps
+/*
+// Retorna o tamanho da fila sem heaps que é igual ao tamanho da fila com heaps - Usada na conferencia do código
 int TamanhoFila(fpSemHeaps *Fila){
     int tamanho = 0;
     node *aux = Fila->head; // Cria um nó auxiliar para navegar na fila
@@ -102,33 +82,82 @@ int TamanhoFila(fpSemHeaps *Fila){
     }
     return tamanho; // Retorna o tamanho da fila
 }
+*/
+
+// PARTE COM HEAPS
+typedef struct heap {
+    int tamanho;
+    int itens[1000];
+} heap;
+
+// Inicia a Heap
+heap *CriarFilaComHeaps() {
+    heap *NovaHeaps = (heap*)malloc(sizeof(heap));
+    NovaHeaps->tamanho = 0; // Inicializa o tamanho
+    return NovaHeaps;
+}
+
+// Cálculo do índice do pai 
+int IndicePai(heap *Fila, int indice) {
+    return indice / 2;
+}
+
+// Função swap simples
+void swap(int *Item1, int *Item2) {
+    int temp = *Item1; // Armazena o valor de Item1 em temp
+    *Item1 = *Item2;    // Atribui o valor de Item2 a Item1
+    *Item2 = temp;      // Atribui o valor armazenado em temp a Item2
+}
+
+// Enqueue Com Heaps - Retorna a quantidade de comparações feitas para dar enqueue
+int EnqueueComHeaps(heap *Fila, int item) {
+    Fila->itens[++Fila->tamanho] = item; // Incrementa o tamanho e adiciona o item
+    int IndiceChave = Fila->tamanho; // Indice do item recém colocaddo
+    int IPai = IndicePai(Fila, IndiceChave); // Calcula o Indice do pai, que deve ser maior
+    int comparacoes = 0; // Inicializa contagem de comparações
+
+    // Mover o item para cima no heap, se necessário
+    while (IPai >= 1 && Fila->itens[IndiceChave] > Fila->itens[IPai]) { // Verifica se o Indice do pai está no limite e se o item adicionado é maior que o pai
+        swap(&Fila->itens[IndiceChave], &Fila->itens[IPai]); // Troca o item com o pai, já que é maior
+        IndiceChave = IPai; // O item agora é o pai
+        IPai = IndicePai(Fila, IndiceChave); // Calcular novo pai
+        comparacoes++; // Contabiliza a comparação
+    }
+    
+    return comparacoes; // Retorna o número de comparações
+}
+
+/*
+// Imprimir Fila Com Heaps - Usada na conferencia do código
+void ImprimirFilaComHeaps(heap *Fila) {
+    for (int i = 1; i <= Fila->tamanho; i++) { // Mantém o loop a partir de 1 para filas que começam em 1
+        printf("%d -> ", Fila->itens[i]);
+    }
+    printf("\n");
+}
+*/
 
 int main (){
     fpSemHeaps *FilaPrioridadeSemHeaps = CriarFilaSemHeaps();
+    heap *FilaPrioridadeComHeaps = CriarFilaComHeaps();
     FILE *arquivo = fopen("entrada_fila.txt", "r"); // Ponteiro para o arquivo de entrada
     FILE *arquivosaida = fopen("saida_fila.txt", "w"); // Ponteiro para o arquivo de saída
     char comando[4];
     int numero;
-    fprintf(arquivosaida, "CMP TAM\n");
+
+    fprintf(arquivosaida, "SEM HEAPS / COM HEAPS / TAM\n");
     if (arquivo == NULL) {
         perror("Erro ao abrir o arquivo");
         return 1; // Retorna erro se o arquivo não puder ser aberto
     }
 
     // Lê os comandos do arquivo até o final
-    while (fscanf(arquivo, "%s", comando) != EOF) {
-        if (strcmp(comando, "ADD") == 0) {
-            fscanf(arquivo, "%d", &numero); // Passa o endereço de 'numero'
-            EnqueueSemHeaps(FilaPrioridadeSemHeaps, numero); // Coloca na fila
-            // ImprimirFilaSemHeaps(FilaPrioridadeSemHeaps);
-        }
-        if (strcmp(comando, "FND") == 0) {
-            fscanf(arquivo, "%d", &numero); // Passa o endereço de 'numero'
-            int comparacoes = AcharNoSemHeaps(FilaPrioridadeSemHeaps, numero); // Guarda quantas comparações foram feitas
-            int tamanho = TamanhoFila(FilaPrioridadeSemHeaps);
-            // fprintf(arquivosaida, "Numero %d Comp %d\n", numero, comparacoes);
-            fprintf(arquivosaida, "%d %d\n", comparacoes, tamanho);
-        }
+    while (fscanf(arquivo, "%d", &numero) != EOF) {
+        int comparacaoSemHeaps = EnqueueSemHeaps(FilaPrioridadeSemHeaps, numero); // Enfilera e retorna a quantidade de comparações sem heaps
+        
+        int comparacaoComHeaps= EnqueueComHeaps(FilaPrioridadeComHeaps, numero); // Enfilera e retorna a quantidade de comparações com heaps
+       
+        fprintf(arquivosaida, "%d %d %d\n", comparacaoSemHeaps, comparacaoComHeaps, FilaPrioridadeComHeaps->tamanho);
     }
 
     // Fecha os arquivos
@@ -143,6 +172,6 @@ int main (){
         free(temp);
     }
     free(FilaPrioridadeSemHeaps);
-
+    free(FilaPrioridadeComHeaps);
     return 0;
 }

@@ -14,7 +14,7 @@ int main(){
     }
     int NumIns[1000];
     int min = 0; // Coloca que o número minimo do sorteio é 0
-    int max = 10000;
+    int max = 10000; // Coloca que o número máximo do sorteio é 10.000
     srand(time(NULL)); // Sementeia o gerador de núemors para ser diferente a cada execução
     for (int i = 0; i <= 500; i++)
     {

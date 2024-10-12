@@ -191,5 +191,5 @@ int main() {
         printf("Nenhum caminho encontrado.\n"); // Avisa que nenhum caminho foi encontrado
     }
 
-    return 0;
+    return 0; // Programa finalizado com sucesso
 }

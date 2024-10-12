@@ -2,7 +2,7 @@ import matplotlib.pyplot as plt
 
 # Inicializa o gráfico e suas configurações
 plt.ion()  # Ativa o modo interativo para atualizações em tempo real
-fig, ax = plt.subplots() # Criar figuras e eixos (subplots) onde vdesenha o gráfico
+fig, ax = plt.subplots() # Criar figuras e eixos (subplots) onde desenha o gráfico
 
 # Inicializa listas vazias para os dados
 tam_list, sh_list, ch_list = [], [], []

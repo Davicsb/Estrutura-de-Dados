@@ -152,8 +152,8 @@ int main (){
     fpSemHeaps *FilaPrioridadeSemHeaps = CriarFilaSemHeaps(); // Chama a função de criar a fila sem heaps
     fpComHeaps *FilaPrioridadeComHeaps = CriarFilaComHeaps(); // Chama a função de criar a fila com heaps
 
-    FILE *ArquivoEntrada = fopen("entrada_fila.txt", "r"); // Ponteiro para o arquivo de entrada
-    FILE *ArquivoSaida = fopen("saida_fila.txt", "w"); // Ponteiro para o arquivo de saída
+    FILE *ArquivoEntrada = fopen("entrada_fila.txt", "r"); // Abre o aqrquivo 'entrada_fila.txt' no modo 'read' - ler
+    FILE *ArquivoSaida = fopen("saida_fila.txt", "w"); // Abre o aqrquivo 'saida.txt' no modo 'write' - escrever
 
     int numero; // Declara a variável que vai receber os números a serem colocados na fila
 

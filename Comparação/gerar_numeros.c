@@ -2,10 +2,10 @@
 #include <stdlib.h>
 #include <time.h>
 
-// GERA O TXT PARA ADIONAR 500 NUMEROS NAS FILAS
+// GERA O TXT PARA ADIONAR 501 NUMEROS NAS FILAS
 
 int main(){
-    FILE *arquivo = fopen("entrada_fila.txt", "w");
+    FILE *arquivo = fopen("entrada_fila.txt", "w"); // Abre o aqrquivo 'entrada_fila.txt' no modo 'write' - escrever
 
     // Verifica se o arquivo foi aberto corretamente
     if (arquivo == NULL) 
@@ -29,7 +29,7 @@ int main(){
     // Fecha o arquivo
     fclose(arquivo);
 
-    printf("Dados gravados em entrada_fila.txt com sucesso!\n");
+    printf("Dados gravados em entrada_fila.txt com sucesso!\n"); // Parâmetro para sabermos se o código rodou com sucesso
     
-    return 0;
+    return 0; // Programa finalizado com sucesso
 }

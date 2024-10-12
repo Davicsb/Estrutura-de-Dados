@@ -161,7 +161,7 @@ int main (){
 
     if (ArquivoEntrada == NULL) 
     {
-        perror("Erro ao abrir o arquivo"); // Função imprime o parâmetro seguido do erro que ocorreu
+        printf("Erro ao abrir o arquivo!\n"); // Identifica que houve um erro ao abrir o arquivo
         return 1; // Retorna erro se o arquivo não puder ser aberto
     }
 

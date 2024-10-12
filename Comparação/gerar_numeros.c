@@ -8,9 +8,10 @@ int main(){
     FILE *arquivo = fopen("entrada_fila.txt", "w");
 
     // Verifica se o arquivo foi aberto corretamente
-    if (arquivo == NULL) {
-        printf("Erro ao abrir o arquivo!\n");
-        return 1;
+    if (arquivo == NULL) 
+    {
+        printf("Erro ao abrir o arquivo!\n"); // Identifica que houve um erro ao abrir o arquivo
+        return 1; // Retorna erro se o arquivo não puder ser aberto
     }
 
     int min = 0; // Coloca que o número minimo do sorteio é 0
@@ -21,7 +22,7 @@ int main(){
     for (int i = 0; i <= 500; i++)
     {
         int num_aleatorio_inserido = rand() % (max - min + 1) + min; // Sorteia um número entre 0 e o 10.000 para inserir na fila
-        
+
         fprintf(arquivo, "%d\n", num_aleatorio_inserido); // Printa o para inserir na fila
     }
 

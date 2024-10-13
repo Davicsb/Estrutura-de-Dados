@@ -182,8 +182,13 @@ int main() {
     {
         printf("Caminho encontrado: "); // Avisa que um caminho foi encontrado
         for (int i = caminho_comprimento - 1; i >= 0; i--) // Imprime o caminho invertido já que a gente guardou do destino para a partida
-        { 
-            printf("(%d, %d) ", caminho[i]->linha, caminho[i]->coluna); // Imprime (linha, coluna) da celula
+        {
+            if (i == 0)
+            {
+                printf("(%d, %d)", caminho[i]->linha, caminho[i]->coluna); // Quando ele tiver chegado no final do for imprime sem '->'
+                break;
+            }
+            printf("(%d, %d) -> ", caminho[i]->linha, caminho[i]->coluna); // Imprime (linha, coluna) da celula
         }
     } 
     else 

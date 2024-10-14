@@ -229,7 +229,6 @@ char* codificar(char **dicionario, unC *dados, LLi tamanhoArquivo){
 //ideia
 //começar com char cabecario[16 + bytes do printPreOrder da arvore]
 
-//recebe um numero < 8 e um ponteiro para um array de char[4]
 void transformandoCoisaEmBinario(int coisa, char *bin, int tamanhoDeBin){
     for(int i = 0; i < tamanhoDeBin - 1; i++){
         bin[i] = '0';

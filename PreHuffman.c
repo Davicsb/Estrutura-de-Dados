@@ -147,6 +147,13 @@ void imprimirDicionario(char **dicionario){
     }
 }
 
+//printa os bytes do arquivo compactado pra um arquivo txt
+void imprimirDadosNovos(char *dadosNovos){
+    FILE* arquivo = fopen("debug.txt", "w");
+    fprintf(arquivo, "%s", dadosNovos);
+    fclose(arquivo);
+}
+
 //---
 
 //adiciona o nó em uma lista de ordem crescente
@@ -317,27 +324,37 @@ void criarDicionarioCompleto(char **dicionario, no *head, char *caminho, int col
 
 }
 
-char* codificar(char **dicionario, unC *dados, LLi tamanhoArquivo){
+char* codificar(char **dicionario, unC *dados, LLi tamanhoArquivo) {
     LLi tamanho = 0;
-    for(LLi i = 0; i < tamanhoArquivo; i++){ //vai iterar pelo arquivo todo
-        tamanho += strlen(dicionario[dados[i]]); //ele vai somar o tamanho da sequencia de 0 e 1 nova do byte do arquivo
-        //exemplo: se o byte atual de dados[i] fosse 'a' então ele vai pegar o tamanho sequencia nova do 'a' no dicionario e somar em tamanho
+    for (LLi i = 0; i < tamanhoArquivo; i++) {
+        tamanho += strlen(dicionario[dados[i]]);
     }
-    tamanho += 1; //como dados novos é uma string de 0 e 1, precisa ter o '\0' no final
-    //
-    
-    char *dadosNovos = calloc(tamanho, sizeof(char)); //aloca um espaço vazio com o calloc para a string dadosNovos que vai segurar a sequencia de 0 e 1 para o arquivo codificado
-    for(LLi i = 0; i < tamanhoArquivo; i++){ //vai iterar pelo arquivo todo novamente
-        strcat(dadosNovos, dicionario[dados[i]]); //mas agora ele vai concatenar cada sequencia em dadosNovos
+    tamanho += 1; // Para o terminador nulo
+
+    // Alocar espaço para dadosNovos
+    char *dadosNovos = (char *)malloc(tamanho * sizeof(char));
+    if (dadosNovos == NULL) {
+        printf("Falha ao alocar memória para dadosNovos.\n");
+        exit(-1);
     }
 
-    return dadosNovos; //retorna dadosNovos
+    // Usar um ponteiro auxiliar para construir a string
+    char *ptr = dadosNovos;
+    for (LLi i = 0; i < tamanhoArquivo; i++) {
+        const char *codigo = dicionario[dados[i]];
+        LLi codigoLen = strlen(codigo);
+        memcpy(ptr, codigo, codigoLen);
+        ptr += codigoLen;
+    }
+    *ptr = '\0'; // Adicionar o terminador nulo
+
+    return dadosNovos;
 }
 
 //---
 
 //--compactar--
-
+//
 void transformandoCoisaEmBinario(int coisa, char *bin, int tamanhoDeBin){
     for(int i = 0; i < tamanhoDeBin - 1; i++){
         bin[i] = '0';
@@ -382,6 +399,7 @@ void escreverCoisaEmBinario(FILE* arquivo, char *dados){
 }
 
 void compactar(char *dadosNovos, unC *arvorePre, int tamanhoArvorePre){
+    imprimirDadosNovos(dadosNovos);
     char cabecario[17] = {0}; //17 pois o final sera \0
     char lixo[4], tamanhoDaArvore[14];
 
@@ -396,11 +414,10 @@ void compactar(char *dadosNovos, unC *arvorePre, int tamanhoArvorePre){
     //Passo 2: pegar o tamanho da arvore e transformar em binario para finalizar o cabeçario
     transformandoCoisaEmBinario(tamanhoArvorePre, tamanhoDaArvore, 14);
     strcat(cabecario, tamanhoDaArvore);
-    printf("Tamanho cabeçário: %ld\n", strlen(cabecario));
     printf("Cabecario = %s\n", cabecario);
 
     //Passo 3: Escrever tudo em binário no arquivo novo
-    FILE* arquivo = fopen("compactado.huff", "wb");
+    FILE* arquivo = fopen("compactado.huff", ESCREVER_BINARIO);
     //checagem de erro
     if (arquivo == NULL) {
         printf("Falha na função compactar ao tentar criar um arquivo novo.\n");
@@ -454,6 +471,7 @@ int main() {
 
         char **dicionario = criarDicionarioVazio(colunas);
         criarDicionarioCompleto(dicionario, listaFreq, "", colunas);
+        //imprimirDicionario(dicionario);
 
         char *dadosNovos = codificar(dicionario, dados, tamanhoArquivo);
 

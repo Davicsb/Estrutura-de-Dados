@@ -3,9 +3,8 @@
 #include <string.h>
 #include <limits.h>
 
-//---util---
-#define LER_BINARIO "rb"
-#define ESCREVER_BINARIO "wb"
+#define LER_BINARIO "rb" //"Reading Binary"
+#define ESCREVER_BINARIO "wb" //"Writing Binary"
 #define TAM 256
 
 typedef struct node no;
@@ -13,25 +12,35 @@ typedef long long int LLi;
 typedef unsigned char unC;
 
 struct node {
-    void* item;
+    void* item; //implementação com void*
     int freq;
     no *next, *left, *right;
 };
-//---
 
-//retorna NULL como ponteiro pro nó
-no* criarLista(){
-    return NULL;
+//---utilidades---
+
+void introducao(){
+    printf("  _    _        __  __                          _____          _ _             \n");
+    printf(" | |  | |      / _|/ _|                        / ____|        | (_)            \n");
+    printf(" | |__| |_   _| |_| |_ _ __ ___   __ _ _ __   | |     ___   __| |_ _ __   __ _ \n");
+    printf(" |  __  | | | |  _|  _| '_ ` _ \\ / _` | '_ \\  | |    / _ \\ / _` | | '_ \\ / _` |\n");
+    printf(" | |  | | |_| | | | | | | | | | | (_| | | | | | |___| (_) | (_| | | | | | (_| |\n");
+    printf(" |_|  |_|\\__,_|_| |_| |_| |_| |_|\\__,_|_| |_|  \\_____\\___/ \\__,_|_|_| |_|\\__, |\n");
+    printf("                                                                          __/ |\n");
+    printf("                                                                         |___/ \n");
+    printf("Implementação da codificação de Huffman apresentada pelos integrantes: Davi Celestino, Humberto Barros e João Tenório.\n");
+    printf("UNIVERSIDADE FEDERAL DE ALAGOAS\n");
+    printf("1 - Compactar arquivo\n2 - Descompactar arquivo\n3 - Sair do programa\n");
 }
 
-//retorn 1 se o cabeça do nó for NULL
-int taVazio(no *head){
-    return (head == NULL);
+//retorna NULL como ponteiro para o no
+no* criarListaVazia(){
+    return NULL;
 }
 
 //retorna 1 se os dois itens (unsigned char) forem iguais
 int unsignedCharEquals(void *item1, void *item2){
-    return (*(unsigned char*) item1 == *(unsigned char*) item2);
+    return (*(unC*) item1 == *(unC*) item2); // como itens void* não podem ser comparados diretamente precisamos fazer o casting com *(tipo*)
 }
 
 //retorna o maior dos dois itens
@@ -43,68 +52,67 @@ int max(int a, int b){
     }
 }
 
-//retorna a altura da arvore (o maior caminho da raíz para uma folha) que será o tamanho máximo de um char no novo alfabeto
-int tamanhoArvore(no *raiz){
+//retorna a altura da arvore (o maior caminho da raíz para uma folha) que será o tamanho máximo de um byte do novo alfabeto
+int alturaArvore(no *raiz){
     if(raiz == NULL){
         return -1;
     } else {
-        int left = tamanhoArvore(raiz->left);
-        int right = tamanhoArvore(raiz->right);
+        int left = alturaArvore(raiz->left);
+        int right = alturaArvore(raiz->right);
 
         return max(left, right) + 1;
     }
 }
 
-int qntsNos(no *bt){
-
-    if(bt == NULL){
+//retorna quantos nós uma arvore tem
+int qntsNos(no *raiz){
+    if(raiz == NULL){
         return 0;
     } else {
-        return qntsNos(bt->left) + qntsNos(bt->right) + 1;
+        return qntsNos(raiz->left) + qntsNos(raiz->right) + 1;
     }
 
 }
 
-no* add(no *head, no *new){
+//faz a pergunta e escaneia o nome do arquivo dado, retornando a string
+char* pegarNomeDoArquivo(){
+    printf("Qual o nome do arquivo? (inclua sua extensão)\n");
 
-    if(taVazio(head)){
-        head = new;
+    char *nomeArquivo = calloc(FILENAME_MAX, sizeof(char));
+    scanf(" %[^\n]", nomeArquivo);
 
-    } else if(new->freq <= head->freq){
-        new->next = head;
-        head = new;
-
-    } else {
-        no *lixo = head;
-        while(lixo->next && lixo->next->freq < new->freq){
-            lixo = lixo->next;
-        }
-        new->next = lixo->next;
-        lixo->next = new;
-
-    }
-
-    return head;
-
+    return nomeArquivo;
 }
 
-void inserir(no **head, LLi freq[TAM]){
-    for(int i = 0; i < TAM; i++){
-        if(freq[i] > 0){
-            no* newNo = (no*) malloc(sizeof(no));
-            
-            newNo->item = malloc(sizeof(unC));
-            *(unC*)newNo->item = (unC)i;
-            newNo->freq = freq[i];
-            newNo->next = NULL;
-            newNo->left = NULL;
-            newNo->right = NULL;
+//retorna o tamanho do arquivo
+LLi tamanhoDoArquivo(FILE *arquivo){
+    
+    fseek(arquivo, 0, SEEK_END); //move o ponteiro pro final
+    LLi tamanhoArquivo = ftell(arquivo); //pega o tamanho
+    fseek(arquivo, 0, SEEK_SET); //volta pro começo
 
-            *head = add(*head, newNo);
-        }
-    }
+    return tamanhoArquivo;
 }
 
+//le os bytes do arquivo e retorna o array dinamico com eles
+unC* lerArquivo(FILE *arquivo, LLi tamanhoArquivo){
+    unC *dados = (unC*) malloc(tamanhoArquivo); // aloca o espaço com base no tamanho do arquivo
+    //checagem de erro
+    if(dados == NULL){
+        printf("Falha na função lerArquivo ao tentar alocar memória para dados.\n");
+        exit(-1);
+    }
+
+    fread(dados, 1, tamanhoArquivo, arquivo); // le o arquivo
+
+    return dados;
+}
+
+//---
+
+//---debug---
+
+//printa todos os elementos da lista, indicando seu byte em hexadecimal, seu char (se for printavel) e sua frequencia
 void printar(no *head){
     no *lixo = head;
     while(lixo){
@@ -113,87 +121,24 @@ void printar(no *head){
     }
 }
 
-void printPreOrder(no *head, unC *arvorePre, int *i){
+//printa todos os nós de uma arvore em pre ordem
+void printPreOrder(no *head){
     if(head != NULL){
 
-        if(head->item){
+        if(head->item){ //se head->item não for NULL ele vai printar seu char
             printf("%c", *(unsigned char*)head->item);
-            arvorePre[*i] = *(unsigned char*)head->item;
             //printf("O byte é 0x%02x (%c) com %d ocorrências\n", *(unsigned char*)head->item, *(unsigned char*)head->item, head->freq);
-        } else {
+
+        } else { //caso contrario ele apenas printa '*'
             printf("*");
-            arvorePre[*i] = '*';
         }
 
-        (*i)++;
-
-        printPreOrder(head->left, arvorePre, i);
-        printPreOrder(head->right, arvorePre, i);
+        printPreOrder(head->left);
+        printPreOrder(head->right);
     }
 }
 
-no* arvore(no* head){
-    if(head){
-
-        if(head->next != NULL){
-
-            no *novoNo = (no*) malloc(sizeof(no));
-            //checagem de erro
-            if(novoNo == NULL){
-                printf("Falha ao alocar memória na função arvore\n");
-                exit(-1);
-            }
-
-            novoNo->item = NULL;
-            novoNo->freq = head->freq + head->next->freq;
-            novoNo->next = NULL;
-
-            novoNo->left = head;
-            novoNo->right = head->next;
-
-            head = head->next->next;
-
-            head = add(head, novoNo);
-            return arvore(head);
-        
-        } else {
-            return head;
-        }
-
-    }
-}
-
-//funções dicionario
-
-char** criarDicionarioVazio(int colunas){
-    char **dicionario = malloc(sizeof(char*) * 256);
-
-    for(int i = 0; i < 256; i++){
-        dicionario[i] = calloc(colunas, sizeof(char));
-    }
-    
-    return dicionario;
-}
-
-void criarDicionarioCompleto(char **dicionario, no *head, char *caminho, int colunas){
-    char left[colunas + 1], right[colunas + 1];
-
-    if(head->left == NULL && head->right == NULL){
-        strcpy(dicionario[*(unsigned char*)head->item], caminho);
-
-    } else {
-        strcpy(left, caminho);
-        strcpy(right, caminho);
-
-        strcat(left, "0");
-        strcat(right, "1");
-
-        criarDicionarioCompleto(dicionario, head->left, left, colunas);
-        criarDicionarioCompleto(dicionario, head->right, right, colunas);
-    }
-
-}
-
+//printa os novos bytes do dicionario formado
 void imprimirDicionario(char **dicionario){
     for(int i = 0; i < 256; i++){
         if(dicionario[i][0] != '\0'){
@@ -202,33 +147,214 @@ void imprimirDicionario(char **dicionario){
     }
 }
 
-//
+//printa os bytes do arquivo compactado pra um arquivo txt
+void imprimirDadosNovos(char *dadosNovos){
+    FILE* arquivo = fopen("debug.txt", "w");
+    fprintf(arquivo, "%s", dadosNovos);
+    fclose(arquivo);
+}
 
-//codificar
+//---
 
-char* codificar(char **dicionario, unC *dados, LLi tamanhoArquivo){
-    //pegar o tamanho total do arquivo novo
+//adiciona o nó em uma lista de ordem crescente
+no* add(no *head, no *new){
+
+    if(head == NULL){ //se a lista estiver vazia
+        head = new; //o novo elemento será a nova cabeça
+
+    } else if(new->freq <= head->freq){ //se a lista NÃO estiver vazia MAS a frequencia do novo elemento for menor ou igual a frequencia do cabeça
+        new->next = head; //o novo elemento terá como proximo o cabeça
+        head = new; // e o novo elemento será o novo cabeça
+
+    } else { //se a lista não estiver vazia e a frequencia do novo elemento for maior do que a do cabeça
+        no *lixo = head;
+        //vamos percorrer a lista até chegar ao fim dela (lixo->next == NULL) ou até a frequencia de um nó da lista for menor que a do novo elemento
+        while(lixo->next && lixo->next->freq < new->freq){
+            lixo = lixo->next;
+        }
+
+        new->next = lixo->next; //o novo elemento terá como proximo o proximo do lixo
+        lixo->next = new; // e o proximo atual do "lixo" será o novo elemento
+
+    }
+
+    return head; // retorna o cabeça
+
+}
+
+//vai preencher a lista com a tabela de frequencia
+no* inserir(LLi freq[TAM]){
+    no *head = criarListaVazia();
+
+    for(int i = 0; i < TAM; i++){ //inicia um loop de 256 iterações, para cada char da tabela ASCII, sendo o i cada char de 0 a 255
+
+        if(freq[i] > 0){ // se a frequencia de um char for maior que zero, significa que ele está presente no arquivo
+
+            no* newNo = (no*) malloc(sizeof(no)); //aloca espaço para um novo nó
+            //checagem de erro
+            if(newNo == NULL){
+                printf("Falha na função inserir ao tentar alocar memória para newNo.\n");
+                exit(-1);
+            }
+
+            newNo->item = malloc(sizeof(unC)); //aloca espaço de um unsigned char para o void*
+            //checagem de erro
+            if(newNo->item == NULL){
+                printf("Falha na função inserir ao tentar alocar memória para newNo->item.");
+                exit(-1);
+            }
+
+            *(unC*)newNo->item = (unC)i; // o item recebera o i convertido para unsigned char
+            newNo->freq = freq[i]; //a frequencia desse nó será a frequecia obtida desse byte
+
+            //e os ponteiros serão NULL
+            newNo->next = NULL;
+            newNo->left = NULL;
+            newNo->right = NULL;
+
+            head = add(head, newNo); // por fim, o novo nó será adicionado na tabela de maneira ordenada
+        }
+    }
+
+    return head; //retorna a lista
+}
+
+//---codificar---
+
+//recebe uma lista e a partir de chamadas recursivas ele constroi a arvore de Huffman
+//o processo será juntar os primeiros dois elementos como filhos de um nó e somar suas frequencias, adicionando esse nó de maneira ordenada na lista novamente
+//a recursão acaba quando houver apenas um elemento na lista, que agora será a raíz da arvore
+no* arvore(no* head){
+    if(head){
+
+        if(head->next != NULL){// se a lista tiver mais de um elemento
+
+            no *novoNo = (no*) malloc(sizeof(no)); //aloca espaço para um novo nó
+            //checagem de erro
+            if(novoNo == NULL){
+                printf("Falha na função arvore ao tentar alocar memória para novoNo.\n");
+                exit(-1);
+            }
+
+            novoNo->item = NULL; //o item desse nó, que vai ser pai dos dois primeiros elementos da lista, não terá um byte/char
+            novoNo->freq = head->freq + head->next->freq; // a frequencia dele será a soma das frequencias dos dois primeros elementos d alista
+            novoNo->next = NULL; // não tera proximo pois ele vai ser adicionado na lista ainda
+
+            novoNo->left = head; // seu filho a esquerda será o primeiro elemento da lista
+            novoNo->right = head->next; // seu filho a direita será o segundo elemento da lista
+
+            head = head->next->next; // a lista tera como cabeça o terceiro elemento (como se tivesse desinfilando o primeiro e segundo elemento)
+
+            head = add(head, novoNo); // esse novo nó será adicionado de maneira ordenada na lista
+            return arvore(head); // chamada recursiva (que ao final retornará a arvore feita)
+        
+        } else {
+            return head; //fim da chamada recursiva
+        }
+
+    }
+}
+
+//funcionando como o printPreOrdem, apenas colocando cada elemento em uma "string"
+void auxArvorePreOrdem(no *head, unC *arvorePre, int *i){
+    if(head != NULL){
+
+        if(head->item){
+            arvorePre[*i] = *(unsigned char*)head->item;
+
+        } else {
+            arvorePre[*i] = '*';
+        }
+        (*i)++; //aumentando o ponteiro, assim a "string" será percorrida normalmente
+
+        auxArvorePreOrdem(head->left, arvorePre, i);
+        auxArvorePreOrdem(head->right, arvorePre, i);
+    }
+}
+
+//a função cria um array arvorePre, o preenche com a função auxiliar com os elementos da arvore e o retorna
+unC* pegarArvorePreOrdem(no *head){
+    unC *arvorePre = (unC*) malloc(qntsNos(head) + 1); // aloca espaço para o arvorePre, a alocação tem + 1 para o char '\0' que indicará o final
+    //checagem de erro
+    if(arvorePre == NULL){
+        printf("Falha na função pegarArvorePreOrdem ao tentar alocar memória para arvorePre.\n");
+        exit(-1);
+    }
+
+    int iterador = 0; // cria um "i" para a função auxiliar o usar
+    auxArvorePreOrdem(head, arvorePre, &iterador);
+    arvorePre[iterador] = '\0'; // coloca \0 no final
+
+    return arvorePre;
+}
+
+//cria uma matriz de strings dinamicamente usando um inteiro "colunas" que será o maior tamanho possivel de sequencia de 0 e 1 do dicionario novo
+char** criarDicionarioVazio(int colunas){
+    char **dicionario = malloc(sizeof(char*) * 256); // aloca 256 espaços para ponteiros de char
+
+    for(int i = 0; i < 256; i++){
+        dicionario[i] = calloc(colunas, sizeof(char)); // para cada espaço alocado ele vai alocar uma string com o calloc (para que ela esteja vazia), as colunas será o tamanho máximo que a string pode ter
+    }
+    
+    return dicionario; // retorna o dicionario vazio
+}
+
+//vai preencher o dicionario vazio
+//"caminho" será uma string vazia "" no inicio
+void criarDicionarioCompleto(char **dicionario, no *head, char *caminho, int colunas){
+    char left[colunas + 1], right[colunas + 1];  // cria duas strings para cada direção
+
+    if(head->left == NULL && head->right == NULL){ //chegou em uma FOLHA (nó que não tem nenhum filho)
+        strcpy(dicionario[*(unsigned char*)head->item], caminho); //copia a string no dicionario na posição do char que head tem como item
+        //por exemplo se head->item == 'a', então a expressão ficaria strcpy(dicionario[97], caminho)
+
+    } else {
+        //o caminho atual será copiado para as duas strings criadas
+        strcpy(left, caminho);
+        strcpy(right, caminho);
+
+        //seguindo a lógica da codificação, toda vez que andarmos para esquerda adicionamos um 0, e para direita 1
+        strcat(left, "0");
+        strcat(right, "1");
+
+        //por fim a chamada recursiva acontece
+        criarDicionarioCompleto(dicionario, head->left, left, colunas); //estamos indo para head->left, por isso usamos a string left como o novo caminho
+        criarDicionarioCompleto(dicionario, head->right, right, colunas); //estamos indo para head->right, por isso usamos a string right como o novo caminho
+    }
+
+}
+
+char* codificar(char **dicionario, unC *dados, LLi tamanhoArquivo) {
     LLi tamanho = 0;
-    for(LLi i = 0; i < tamanhoArquivo; i++){
+    for (LLi i = 0; i < tamanhoArquivo; i++) {
         tamanho += strlen(dicionario[dados[i]]);
     }
-    tamanho += 1;
-    //
-    
-    char *dadosNovos = calloc(tamanho, sizeof(char));
-    for(LLi i = 0; i < tamanhoArquivo; i++){
-        strcat(dadosNovos, dicionario[dados[i]]);
+    tamanho += 1; // Para o terminador nulo
+
+    // Alocar espaço para dadosNovos
+    char *dadosNovos = (char *)malloc(tamanho * sizeof(char));
+    if (dadosNovos == NULL) {
+        printf("Falha ao alocar memória para dadosNovos.\n");
+        exit(-1);
     }
+
+    // Usar um ponteiro auxiliar para construir a string
+    char *ptr = dadosNovos;
+    for (LLi i = 0; i < tamanhoArquivo; i++) {
+        const char *codigo = dicionario[dados[i]];
+        LLi codigoLen = strlen(codigo);
+        memcpy(ptr, codigo, codigoLen);
+        ptr += codigoLen;
+    }
+    *ptr = '\0'; // Adicionar o terminador nulo
 
     return dadosNovos;
 }
 
+//---
+
+//--compactar--
 //
-
-//compactar
-//ideia
-//começar com char cabecario[16 + bytes do printPreOrder da arvore]
-
 void transformandoCoisaEmBinario(int coisa, char *bin, int tamanhoDeBin){
     for(int i = 0; i < tamanhoDeBin - 1; i++){
         bin[i] = '0';
@@ -243,166 +369,124 @@ void transformandoCoisaEmBinario(int coisa, char *bin, int tamanhoDeBin){
     }
 }
 
-void escreverCoisaEmBinario(FILE* arquivo, void *dados, char *tipo){
-
+void escreverCoisaEmBinario(FILE* arquivo, char *dados){
     int i = 0, j = 7;
     unsigned char byte = 0; // 00000000
-    
-    if(strcmp(tipo, "char") == 0){
-        while (((char*)dados)[i] != '\0') {
 
-            unsigned char mascara = 1; // 00000001
+    while ((dados)[i] != '\0') {
 
-            if (((char*)dados)[i] == '1') {
-                mascara = mascara << j;
-                byte = byte | mascara;
-            }
-            j--;
+        unsigned char mascara = 1; // 00000001
 
-            if (j < 0) {
-                fwrite(&byte, sizeof(unsigned char), 1, arquivo);
-                byte = 0;
-                j = 7;
-            }
-            i++;
-
+        if ((dados)[i] == '1') {
+            mascara = mascara << j;
+            byte = byte | mascara;
         }
+        j--;
 
-        if (j != 7) {
+        if (j < 0) {
             fwrite(&byte, sizeof(unsigned char), 1, arquivo);
+            byte = 0;
+            j = 7;
         }
+        i++;
 
-    } else if(strcmp(tipo, "unsigned char") == 0){
-        while (((unsigned char*)dados)[i] != '\0') {
+    }
 
-            unsigned char mascara = 1; // 00000001
-
-            if (((unsigned char*)dados)[i] == '1') {
-                mascara = mascara << j;
-                byte = byte | mascara;
-            }
-            j--;
-
-            if (j < 0) {
-                fwrite(&byte, sizeof(unsigned char), 1, arquivo);
-                byte = 0;
-                j = 7;
-            }
-            i++;
-
-        }
-
-        if (j != 7) {
-            fwrite(&byte, sizeof(unsigned char), 1, arquivo);
-        }
-
+    if (j != 7) {
+        fwrite(&byte, sizeof(unsigned char), 1, arquivo);
     }
 
 }
 
-// Compactar arquivo
-void compactar(char *dadosNovos, unC *arvorePre, int tamanhoArvorePre) {
-    char cabecario[17] = {0};  // Inicializando o cabeçário
-    char lixo[4] = {0};
-    char tamanhoArrvore[14] = {0};
+void compactar(char *dadosNovos, unC *arvorePre, int tamanhoArvorePre){
+    imprimirDadosNovos(dadosNovos);
+    char cabecario[17] = {0}; //17 pois o final sera \0
+    char lixo[4], tamanhoDaArvore[14];
 
-    // Passo 1: lixo
-    int lixoArquivo = 8 - (strlen(dadosNovos) % 8);
-    if (lixoArquivo == 8) {
-        lixoArquivo = 0;
-    }
-    printf("Lixo do Arquivo: %d\n", lixoArquivo);
-    transformandoCoisaEmBinario(lixoArquivo, lixo, 4);
+    //passo 1: pegar o lixo que vai sobrar e transforma-lo em binario para o cabeçario
+    int lixoDoArquivoNovo = 8 - (strlen(dadosNovos) % 8);
+    if(lixoDoArquivoNovo == 8) lixoDoArquivoNovo = 0;
+
+    printf("Lixo do Arquivo: %d\n", lixoDoArquivoNovo);
+    transformandoCoisaEmBinario(lixoDoArquivoNovo, lixo, 4);
     strcat(cabecario, lixo);
 
-    // Passo 2: arvorePre
-    transformandoCoisaEmBinario(tamanhoArvorePre, tamanhoArrvore, 14);
-    strcat(cabecario, tamanhoArrvore);
-    printf("Tamanho cabeçário: %ld\n", strlen(cabecario));
+    //Passo 2: pegar o tamanho da arvore e transformar em binario para finalizar o cabeçario
+    transformandoCoisaEmBinario(tamanhoArvorePre, tamanhoDaArvore, 14);
+    strcat(cabecario, tamanhoDaArvore);
+    printf("Cabecario = %s\n", cabecario);
 
-    // Processo de escrever
-    FILE* arquivo = fopen("salve.sus", "wb");
-    if (!arquivo) {
-        printf("Falha ao criar o arquivo.\n");
+    //Passo 3: Escrever tudo em binário no arquivo novo
+    FILE* arquivo = fopen("compactado.huff", ESCREVER_BINARIO);
+    //checagem de erro
+    if (arquivo == NULL) {
+        printf("Falha na função compactar ao tentar criar um arquivo novo.\n");
         return;
     }
 
-    // Escrever cabeçário
-    escreverCoisaEmBinario(arquivo, cabecario, "char");
+    escreverCoisaEmBinario(arquivo, cabecario);
 
-    // Escrever arvorePre
     int i = 0;
-    while (arvorePre[i] != '\0') {
+    while(arvorePre[i] != '\0'){
         fwrite(&arvorePre[i], sizeof(unsigned char), 1, arquivo);
         i++;
     }
 
-    // Escrever dados novos
-    escreverCoisaEmBinario(arquivo, dadosNovos, "unsigned char");
+    escreverCoisaEmBinario(arquivo, dadosNovos);
 
     fclose(arquivo);
 }
-//
 
-int main(){
-    printf("Qual o nome do arquivo? (inclua sua extensão)\n");
+//---
 
-    char nomeArquivo[TAM];
-    scanf(" %[^\n]", nomeArquivo);
+int main() {
+    introducao();
 
-    FILE* arquivo = fopen(nomeArquivo, LER_BINARIO);
-    if (arquivo == NULL) {
-        printf("Falha ao abrir o arquivo.\n");
+    int opcao;
+    scanf("%d", &opcao);
+
+    if(opcao == 1){
+        char *nomeDoArquivo = pegarNomeDoArquivo();
+
+        FILE* arquivo = fopen(nomeDoArquivo, LER_BINARIO);
+        //checagem de erro
+        if (arquivo == NULL) {
+            printf("Falha ao abrir o arquivo.\n");
+            exit(-1);
+        }
+
+        LLi tamanhoArquivo = tamanhoDoArquivo(arquivo);
+        unC *dados = lerArquivo(arquivo, tamanhoArquivo);
+
+        LLi freq[TAM] = {0};
+        for (LLi i = 0; i < tamanhoArquivo; i++) {
+            freq[dados[i]] += 1;
+        }
+
+        no *listaFreq = inserir(freq);
+        listaFreq = arvore(listaFreq);
+
+        unC *arvorePre = pegarArvorePreOrdem(listaFreq);
+        int colunas = alturaArvore(listaFreq) + 1;
+
+        char **dicionario = criarDicionarioVazio(colunas);
+        criarDicionarioCompleto(dicionario, listaFreq, "", colunas);
+        //imprimirDicionario(dicionario);
+
+        char *dadosNovos = codificar(dicionario, dados, tamanhoArquivo);
+
+        compactar(dadosNovos, arvorePre, qntsNos(listaFreq));
+        
+        fclose(arquivo);
+
+
+    } else if(opcao == 2){
+        printf("Em construção\n");
+
+    } else {
         exit(-1);
+
     }
 
-    fseek(arquivo, 0, SEEK_END); //vai pro final
-    LLi tamanhoArquivo = ftell(arquivo); //pega o tamanho
-    fseek(arquivo, 0, SEEK_SET); //volta pro começo
-
-    unC *dados = (unC*) malloc(tamanhoArquivo);
-    if(dados == NULL){
-        printf("Falha ao alocar memória.");
-        exit(-1);
-    }
-
-    fread(dados, 1, tamanhoArquivo, arquivo);
-    LLi freq[TAM] = {0};
-
-    no *listaFreq = criarLista();
-    for (LLi i = 0; i < tamanhoArquivo; i++) {
-        freq[dados[i]] += 1;
-    }
-
-    inserir(&listaFreq, freq);
-    printar(listaFreq);
-
-    listaFreq = arvore(listaFreq);
-
-    unC *arvorePre = (unC*) malloc(qntsNos(listaFreq) + 1);
-    if(arvorePre == NULL){
-        printf("Falha ao alocar memória.");
-        exit(-1);
-    }
-
-    int iterador = 0;
-
-    printPreOrder(listaFreq, arvorePre, &iterador);
-    arvorePre[iterador + 1] = '\0';
-
-    printf("\n");
-
-    int colunas = tamanhoArvore(listaFreq) + 1;
-
-    char **dicionario = criarDicionarioVazio(colunas);
-    criarDicionarioCompleto(dicionario, listaFreq, "", colunas);
-    imprimirDicionario(dicionario);
-
-    char *dadosNovos = codificar(dicionario, dados, tamanhoArquivo);
-    printf("%s\n", dadosNovos);
-
-    compactar(dadosNovos, arvorePre, qntsNos(listaFreq));
-
-    free(dados);
-    fclose(arquivo);
+    return 0;
 }

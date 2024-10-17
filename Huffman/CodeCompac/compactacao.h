@@ -112,7 +112,7 @@ void transformandoCoisaEmBinario(int coisa, char *bin, int tamanhoDeBin);
 void escreverCoisaEmBinario(FILE* arquivo, char *dados);
 
 //faz os procedimentos para escrever o cabeçario e os dados novos em um arquivo novo
-void compactar(char *dadosNovos, unC *arvorePre, int tamanhoArvorePre);
+void compactar(char *dadosNovos, unC *arvorePre, int tamanhoArvorePre, char *nomeOriginal);
 
 //---
 

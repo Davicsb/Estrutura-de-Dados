@@ -132,18 +132,16 @@ void printar(no *head){
 //printa todos os nós de uma arvore em pre ordem
 void printPreOrder(no *head){
     if(head != NULL){
-
-        if(head->item){ //se head->item não for NULL ele vai printar seu char
+        if(head->left == NULL && head->right == NULL){ // FOLHA
             printf("%c", *(unsigned char*)head->item);
-            //printf("O byte é 0x%02x (%c) com %d ocorrências\n", *(unsigned char*)head->item, *(unsigned char*)head->item, *(LLi*)head->freq);
-
-        } else { //caso contrario ele apenas printa '*'
+        } else {
             printf("*");
         }
 
         printPreOrder(head->left);
         printPreOrder(head->right);
     }
+
 }
 
 //printa os novos bytes do dicionario formado
@@ -277,8 +275,7 @@ no* arvore(no* head){
 //funcionando como o printPreOrdem, apenas colocando cada elemento em uma "string"
 void auxArvorePreOrdem(no *head, unC *arvorePre, int *i){
     if(head != NULL){
-
-        if(head->item){
+        if(head->left == NULL && head->right == NULL){ // FOLHA
             arvorePre[*i] = *(unsigned char*)head->item;
 
         } else {

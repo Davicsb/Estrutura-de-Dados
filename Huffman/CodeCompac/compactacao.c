@@ -421,7 +421,11 @@ void escreverCoisaEmBinario(FILE* arquivo, char *dados){
 }
 
 //faz os procedimentos para escrever o cabeçario e os dados novos em um arquivo novo
-void compactar(char *dadosNovos, unC *arvorePre, int tamanhoArvorePre){
+void compactar(char *dadosNovos, unC *arvorePre, int tamanhoArvorePre, char *nomeOriginal){
+    char nomeModificado[strlen(nomeOriginal) + 6]; // cria uma string que vai ser o nome do arquivo de saída, o + 6 é para o .huff
+    strcpy(nomeModificado, nomeOriginal); //copia o nome original para o nome modificado
+    strcat(nomeModificado, ".huff"); // adiciona .huff no final da string
+
     char cabecario[17] = {0}; //definindo elementos como \0, 17 pois o char \0 final indica o fim da string
     char lixo[4], tamanhoDaArvore[14]; // criando arrays auxiliares para os binários do lixo e tamanho da arvore
 
@@ -439,7 +443,7 @@ void compactar(char *dadosNovos, unC *arvorePre, int tamanhoArvorePre){
     printf("Cabecario = %s\n", cabecario); // debug
 
     //Passo 3: Escrever tudo em binário no arquivo novo
-    FILE* arquivo = fopen("compactado.huff", ESCREVER_BINARIO); //criando o arquivo "compactado.huff"
+    FILE* arquivo = fopen(nomeModificado, ESCREVER_BINARIO); //criando o arquivo "compactado.huff"
     //checagem de erro
     if (arquivo == NULL) {
         printf("Falha na função compactar ao tentar criar um arquivo novo.\n");
@@ -490,7 +494,7 @@ void processoParaCompactar(char *nomeDoArquivo){
 
     char *dadosNovos = codificar(dicionario, dados, tamanhoArquivo); // codifica os bytes de dados com o dicionario em uma string de 0s e 1s
 
-    compactar(dadosNovos, arvorePre, qntsNos(listaFreq)); // escreve os dados novos em binário junto com o cabeçário
+    compactar(dadosNovos, arvorePre, qntsNos(listaFreq), nomeDoArquivo); // escreve os dados novos em binário junto com o cabeçário
 
     //libera a memória alocada e fecha o arquivo
     free(nomeDoArquivo);

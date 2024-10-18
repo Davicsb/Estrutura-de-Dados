@@ -21,11 +21,6 @@ no* criarListaVazia(){
     return NULL;
 }
 
-//retorna 1 se os dois itens (unsigned char) forem iguais
-int unsignedCharEquals(void *item1, void *item2){
-    return (*(unC*) item1 == *(unC*) item2); // como itens void* não podem ser comparados diretamente precisamos fazer o casting com *(tipo*)
-}
-
 //retorna o maior dos dois itens
 int max(int a, int b){
     if(a > b){
@@ -52,7 +47,18 @@ int qntsNos(no *raiz){
     if(raiz == NULL){
         return 0;
     } else {
-        return qntsNos(raiz->left) + qntsNos(raiz->right) + 1;
+        if(raiz->left == NULL && raiz->right == NULL){ // FOLHA
+            if(*(unC*)raiz->item == '*' || *(unC*)raiz->item == '\\'){
+                return qntsNos(raiz->left) + qntsNos(raiz->right) + 2; // mais 2 pra contar o contra barra
+
+            } else {
+                return qntsNos(raiz->left) + qntsNos(raiz->right) + 1;
+
+            }
+        } else {
+            return qntsNos(raiz->left) + qntsNos(raiz->right) + 1;
+
+        }
     }
 
 }
@@ -133,7 +139,13 @@ void printar(no *head){
 void printPreOrder(no *head){
     if(head != NULL){
         if(head->left == NULL && head->right == NULL){ // FOLHA
-            printf("%c", *(unsigned char*)head->item);
+            if(*(unC*)head->item == '*' || *(unC*)head->item == '\\'){
+                printf("\\%c", *(unsigned char*)head->item);
+
+            } else {
+                printf("%c", *(unsigned char*)head->item);
+
+            }
         } else {
             printf("*");
         }
@@ -148,7 +160,7 @@ void printPreOrder(no *head){
 void imprimirDicionario(char **dicionario){
     for(int i = 0; i < TAM; i++){
         if(dicionario[i][0] != '\0'){
-            printf("%3d %c %s\n", i, i, dicionario[i]);
+            printf("%3d 0x%02x %s\n", i, i, dicionario[i]);
         }
     }
 }
@@ -273,15 +285,19 @@ no* arvore(no* head){
 }
 
 //funcionando como o printPreOrdem, apenas colocando cada elemento em uma "string"
-void auxArvorePreOrdem(no *head, unC *arvorePre, int *i){
-    if(head != NULL){
-        if(head->left == NULL && head->right == NULL){ // FOLHA
-            arvorePre[*i] = *(unsigned char*)head->item;
-
+void auxArvorePreOrdem(no *head, unC *arvorePre, int *i) {
+    if (head != NULL) {
+        if (head->left == NULL && head->right == NULL) { // FOLHA
+            if (*(unC*)head->item == '*' || *(unC*)head->item == '\\') {
+                arvorePre[*i] = '\\'; // primeiro, adiciona o caractere de escape
+                (*i)++; // incrementa o índice
+            }
+            arvorePre[*i] = *(unsigned char*)head->item; // adiciona o caractere
+            (*i)++; // incrementa o índice novamente
         } else {
-            arvorePre[*i] = '*';
+            arvorePre[*i] = '*'; // adiciona o caractere para nós internos
+            (*i)++; // incrementa o índice
         }
-        (*i)++; //aumentando o ponteiro, assim a "string" será percorrida normalmente
 
         auxArvorePreOrdem(head->left, arvorePre, i);
         auxArvorePreOrdem(head->right, arvorePre, i);
@@ -290,7 +306,7 @@ void auxArvorePreOrdem(no *head, unC *arvorePre, int *i){
 
 //a função cria um array arvorePre, o preenche com a função auxiliar com os elementos da arvore e o retorna
 unC* pegarArvorePreOrdem(no *head){
-    unC *arvorePre = (unC*) malloc(qntsNos(head) + 1); // aloca espaço para o arvorePre, a alocação tem + 1 para o char '\0' que indicará o final
+    unC *arvorePre = (unC*) malloc(qntsNos(head) + 1); // aloca espaço para o arvorePre
     //checagem de erro
     if(arvorePre == NULL){
         printf("Falha na função pegarArvorePreOrdem ao tentar alocar memória para arvorePre.\n");
@@ -449,10 +465,8 @@ void compactar(char *dadosNovos, unC *arvorePre, int tamanhoArvorePre, char *nom
 
     escreverCoisaEmBinario(arquivo, cabecario); //por meio de manipulações booleanas vai escrever o cabeçario no (começo do) arquivo
 
-    int i = 0;
-    while(arvorePre[i] != '\0'){ // iterando até o fim da string
+    for(int i = 0; i < tamanhoArvorePre; i++){ // iterando até o fim da string
         fwrite(&arvorePre[i], sizeof(unsigned char), 1, arquivo); // escreve os bytes que estão na arvore no arquivo, como eles são unsigned chars não nescessita manipulações
-        i++;
     }
 
     escreverCoisaEmBinario(arquivo, dadosNovos); // por fim escreve as sequencias de 0s e 1s de dados novos no arquivo
@@ -482,12 +496,23 @@ void processoParaCompactar(char *nomeDoArquivo){
 
     no *listaFreq = inserir(freq); // com o array de frenquencias preenchemos uma lista com cada byte e sua frequencia
     listaFreq = arvore(listaFreq); // com a lista fazemos a arvore de Huffman
+    printf("qnts nós tem a arvore: %d\n", qntsNos(listaFreq));
+
+    printf("print com funcao:\n");
+    printPreOrder(listaFreq);
+    printf("\n");
 
     unC *arvorePre = pegarArvorePreOrdem(listaFreq); // pega a arvore em uma "string" em pre ordem
+    printf("print do array:\n");
+    for(int i = 0; i < qntsNos(listaFreq); i++){
+        printf("%c", arvorePre[i]);
+    }
+    printf("\n");
     int colunas = alturaArvore(listaFreq) + 1; // pega o caminho máximo que um novo byte pode ter na criação do dicionario
 
     char **dicionario = criarDicionarioVazio(colunas); // cria uma matriz de strings dicionario, com 256 linhas e x colunas
     criarDicionarioCompleto(dicionario, listaFreq, "", colunas); // preenche o dicionario com a arvore de Huffman
+    imprimirDicionario(dicionario);
 
     char *dadosNovos = codificar(dicionario, dados, tamanhoArquivo); // codifica os bytes de dados com o dicionario em uma string de 0s e 1s
 

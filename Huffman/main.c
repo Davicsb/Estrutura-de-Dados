@@ -1,12 +1,15 @@
 #include "CodeCompac/compactacao.h"
 
 int main() {
+    
     introducao();
 
     int opcao;
     scanf("%d", &opcao);
+    limpartela();
 
     if(opcao == 1){
+        
         char *nomeDoArquivo = pegarNomeDoArquivo();
 
         processoParaCompactar(nomeDoArquivo);
@@ -18,8 +21,8 @@ int main() {
         printf("Em construção\n");
 
     } else {
+        limpartela();
         exit(-1);
-
     }
 
     return 0;

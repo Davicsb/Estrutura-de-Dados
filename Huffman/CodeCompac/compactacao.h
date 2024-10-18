@@ -7,7 +7,7 @@
 #include <limits.h>
 
 #define LER_BINARIO "rb" //"Reading Binary"
-#define ESCREVER_BINARIO "wb" //"Writing Binary"
+#define ESCREVER_BINARIO "ab"
 #define TAM 256
 
 typedef struct node no;

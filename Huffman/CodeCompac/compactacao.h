@@ -22,6 +22,8 @@ struct node {
 
 //---utilidades---
 
+void limpartela();
+
 void introducao();
 
 //retorna NULL como ponteiro para o no

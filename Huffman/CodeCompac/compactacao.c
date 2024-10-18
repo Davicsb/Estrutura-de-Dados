@@ -11,9 +11,11 @@ void introducao(){
     printf(" |_|  |_|\\__,_|_| |_| |_| |_| |_|\\__,_|_| |_|  \\_____\\___/ \\__,_|_|_| |_|\\__, |\n");
     printf("                                                                          __/ |\n");
     printf("                                                                         |___/ \n");
-    printf("Implementação da codificação de Huffman apresentada pelos integrantes: Davi Celestino, Humberto Barros e João Tenório.\n");
-    printf("UNIVERSIDADE FEDERAL DE ALAGOAS\n");
-    printf("1 - Compactar arquivo\n2 - Descompactar arquivo\n3 - Sair do programa\n");
+    printf("O que deseja fazer?\n1 - Compactar arquivo\n2 - Descompactar arquivo\n3 - Sair do programa\n> ");
+}
+
+void limpartela(){
+    system("cls");
 }
 
 //retorna NULL como ponteiro para o no
@@ -65,7 +67,7 @@ int qntsNos(no *raiz){
 
 //faz a pergunta e escaneia o nome do arquivo dado, retornando a string
 char* pegarNomeDoArquivo(){
-    printf("Qual o nome do arquivo? (inclua sua extensão)\n");
+    printf("Qual o nome completo do arquivo?\n> ");
 
     char *nomeArquivo = calloc(FILENAME_MAX, sizeof(char));
     scanf(" %[^\n]", nomeArquivo);
@@ -446,14 +448,12 @@ void compactar(char *dadosNovos, unC *arvorePre, int tamanhoArvorePre, char *nom
     int lixoDoArquivoNovo = 8 - (strlen(dadosNovos) % 8); // esse calculo vai pegar os bits que não foram usados no byte final (lixo)
     if(lixoDoArquivoNovo == 8) lixoDoArquivoNovo = 0; // se strlen(dadosNovos) % 8 == 0 então não há lixo
 
-    printf("Lixo do Arquivo: %d\n", lixoDoArquivoNovo); //debug
     transformandoCoisaEmBinario(lixoDoArquivoNovo, lixo, 4); // vai pegar o numero x do lixo e transforma-lo em uma string representando número binário em lixo
     strcat(cabecario, lixo); // concatena lixo em cabeçario (que no caso está vazio)
 
     //Passo 2: pegar o tamanho da arvore e transformar em binario para finalizar o cabeçario
     transformandoCoisaEmBinario(tamanhoArvorePre, tamanhoDaArvore, 14); // pega o numero x do tamanho e o transforma em uma string representando seu número binário
     strcat(cabecario, tamanhoDaArvore); // concatena o tamanho da arvore no cabeçario, o finalizando
-    printf("Cabecario = %s\n", cabecario); // debug
 
     //Passo 3: Escrever tudo em binário no arquivo novo
     FILE* arquivo = fopen(nomeModificado, ESCREVER_BINARIO); //criando o arquivo "compactado.huff"
@@ -496,23 +496,13 @@ void processoParaCompactar(char *nomeDoArquivo){
 
     no *listaFreq = inserir(freq); // com o array de frenquencias preenchemos uma lista com cada byte e sua frequencia
     listaFreq = arvore(listaFreq); // com a lista fazemos a arvore de Huffman
-    printf("qnts nós tem a arvore: %d\n", qntsNos(listaFreq));
-
-    printf("print com funcao:\n");
-    printPreOrder(listaFreq);
-    printf("\n");
 
     unC *arvorePre = pegarArvorePreOrdem(listaFreq); // pega a arvore em uma "string" em pre ordem
-    printf("print do array:\n");
-    for(int i = 0; i < qntsNos(listaFreq); i++){
-        printf("%c", arvorePre[i]);
-    }
-    printf("\n");
+
     int colunas = alturaArvore(listaFreq) + 1; // pega o caminho máximo que um novo byte pode ter na criação do dicionario
 
     char **dicionario = criarDicionarioVazio(colunas); // cria uma matriz de strings dicionario, com 256 linhas e x colunas
     criarDicionarioCompleto(dicionario, listaFreq, "", colunas); // preenche o dicionario com a arvore de Huffman
-    imprimirDicionario(dicionario);
 
     char *dadosNovos = codificar(dicionario, dados, tamanhoArquivo); // codifica os bytes de dados com o dicionario em uma string de 0s e 1s
 

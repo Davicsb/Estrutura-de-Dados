@@ -96,6 +96,8 @@ void auxArvorePreOrdem(no *head, unC *arvorePre, int *i);
 //a função cria um array arvorePre, o preenche com a função auxiliar com os elementos da arvore e o retorna
 unC* pegarArvorePreOrdem(no *head);
 
+char** criarDicionarioVazio(int colunas);
+
 //vai preencher o dicionario vazio
 //"caminho" será uma string vazia "" no inicio
 void criarDicionarioCompleto(char **dicionario, no *head, char *caminho, int colunas);

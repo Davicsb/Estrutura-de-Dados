@@ -181,7 +181,6 @@ void calcFreq(unC *dados, LLi tamanhoArquivo, LLi *freq){
     for (LLi i = 0; i < tamanhoArquivo; i++) {
         freq[dados[i]] += 1; // na posição equivalente de dados[i] somamos mais um, exemplo se dados[i] == 'a' então freq[97] += 1
     }
-
 }
 
 //adiciona o nó em uma lista de ordem crescente
@@ -329,7 +328,6 @@ char** criarDicionarioVazio(int colunas){
     for(int i = 0; i < TAM; i++){
         dicionario[i] = calloc(colunas, sizeof(char)); // para cada espaço alocado ele vai alocar uma string com o calloc (para que ela esteja vazia), as colunas será o tamanho máximo que a string pode ter
     }
-    
     return dicionario; // retorna o dicionario vazio
 }
 
@@ -489,6 +487,7 @@ void processoParaCompactar(char *nomeDoArquivo){
     }
 
     LLi tamanhoArquivo = tamanhoDoArquivo(arquivo); // pega quantos bytes tem no arquivo como tamanho
+
     unC *dados = lerArquivo(arquivo, tamanhoArquivo); // faz a leitura dos bytes e os salva em dados
 
     LLi freq[TAM] = {0}; // cria um array para contar a frequencia de cada byte

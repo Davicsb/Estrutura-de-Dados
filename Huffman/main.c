@@ -1,32 +1,55 @@
-#include "CodeCompac/compactacao.h"
-#include "CodeCompac/descompactacao.h"
+#include "Code/compactacao.h"
+#include "Code/descompactacao.h"
 
 int main() {
     limpartela();
-    introducao();
+    
+    while (1)
+    {
+        introducao();
 
-    int opcao;
-    scanf("%d", &opcao);
-    limpartela();
+        int opcao;
+        scanf("%d", &opcao);
+        limpartela();
 
-    if(opcao == 1){
+        if(opcao == 1)
+        {
         
         char *nomeDoArquivo = pegarNomeDoArquivo();
 
-        processoParaCompactar(nomeDoArquivo);
+            if (processoParaCompactar(nomeDoArquivo) == 1)
+            {
+                limpartela();
+                printf("Arquivo compactado com sucesso!\n");
+            }
+            else
+            {
+                printf("Falha ao abrir o arquivo. Tente novamente!\n");
+            }
+        
+        }
 
-        printf("Arquivo compactado com sucesso!");
-
-    } else if(opcao == 2){
+        else if(opcao == 2)
+        {
         char *nomeDoArquivo = pegarNomeDoArquivo();
 
-        processoParaDescompactar(nomeDoArquivo);
+            if (processoParaDescompactar(nomeDoArquivo) == 1)
+            {
+                limpartela();
+                printf("Arquivo descompactado com sucesso!\n");
+            }
+            else
+            {
+                printf("Falha ao abrir o arquivo. Tente novamente!\n");
+            }
 
-        printf("Arquivo descompactado com sucesso!");
+        }
 
-    } else {
-        limpartela();
-        exit(-1);
+        else 
+        {
+            limpartela();
+            break;
+        }
     }
 
     return 0;

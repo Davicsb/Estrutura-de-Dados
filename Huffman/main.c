@@ -1,7 +1,8 @@
 #include "CodeCompac/compactacao.h"
+#include "CodeCompac/descompactacao.h"
 
 int main() {
-    
+    limpartela();
     introducao();
 
     int opcao;
@@ -17,8 +18,11 @@ int main() {
         printf("Arquivo compactado com sucesso!");
 
     } else if(opcao == 2){
+        char *nomeDoArquivo = pegarNomeDoArquivo();
 
-        printf("Em construção\n");
+        processoParaDescompactar(nomeDoArquivo);
+
+        printf("Arquivo descompactado com sucesso!");
 
     } else {
         limpartela();

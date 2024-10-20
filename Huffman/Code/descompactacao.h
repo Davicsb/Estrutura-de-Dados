@@ -9,13 +9,13 @@ void *criarPonteiro(unC byte);
 
 no *criarNo(void *byte);
 
-int readTrash(FILE *arquivo);
+LLi readTrash(unC *dados, LLi *index);
 
-LLi readSizeTree(FILE *arquivo);
+LLi readSizeTree(unC *dados, LLi *index);
 
-no* readTree(FILE *arquivo, LLi *treeSize);
+no* readTree(unC *dados, LLi *index, LLi *treeSize);
 
-void writeFile(FILE *arquivoIn, FILE *arquivoOut, short int trash, LLi sizeFile, no *tree);
+void writeFile(unC *dados, LLi *index, FILE *arquivoOut, short int trash, LLi sizeFile, no *tree);
 
 int processoParaDescompactar(char *nomeDoArquivo);
 

@@ -17,30 +17,34 @@ int main() {
         
         char *nomeDoArquivo = pegarNomeDoArquivo();
 
+        limpartela();
+
             if (processoParaCompactar(nomeDoArquivo) == 1)
             {
-                limpartela();
-                printf("Arquivo compactado com sucesso!\n");
+                printf("> Arquivo compactado com sucesso! <\n");
             }
             else
             {
-                printf("Falha ao abrir o arquivo. Tente novamente!\n");
+                printf("> Falha ao abrir \"%s\". Tente novamente! <\n", nomeDoArquivo);
             }
         
         }
 
         else if(opcao == 2)
         {
+
         char *nomeDoArquivo = pegarNomeDoArquivo();
+
+        limpartela();
 
             if (processoParaDescompactar(nomeDoArquivo) == 1)
             {
-                limpartela();
-                printf("Arquivo descompactado com sucesso!\n");
+                
+                printf("> Arquivo descompactado com sucesso! <\n");
             }
             else
             {
-                printf("Falha ao abrir o arquivo. Tente novamente!\n");
+                printf("> Falha ao abrir \"%s\". Tente novamente! <\n", nomeDoArquivo);
             }
 
         }

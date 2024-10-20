@@ -10,10 +10,11 @@ no *criarNo(void *byte){
     return newNode;
 }
 
-int readTrash(FILE* arquivo){
+LLi readTrash(unC *dados, LLi *index){
     //Ler primeiro byte 
-    unC byte;
-    fread(&byte,sizeof(unC),1,arquivo);
+    unC byte = dados[*index];
+
+    //fread(&byte,sizeof(unC),1,arquivo);
     //Nesse byte vai os 3 primeiros são o lixo e os 5 sao parte do tamanho da arvore.
 
     //Como nao queremos ler o tamanho da arvore neste instante empurramos o lixo para o começo do byte. Usando o >> 5.
@@ -22,18 +23,19 @@ int readTrash(FILE* arquivo){
     //Assim ficando 00000TTT.
 
     //voltamos o ponteiro para o inicio do arquivo.
-    fseek(arquivo, 0, SEEK_SET);
+    //fseek(arquivo, 0, SEEK_SET);
 
     //Retornamos o valor de Trash (00000TTT), que voltara como um inteiro, representando o lixo do ultimo byte do arquivo.
     return trash;
 }
 
-LLi readSizeTree(FILE *arquivo){
+LLi readSizeTree(unC *dados, LLi *index){
     //Ler os dois primeiros bytes. Byte1 = TTTSSSSS e Byte2 = SSSSSSSS
-    unC byte1;
-    unC byte2;
-    fread(&byte1,sizeof(unC),1,arquivo);
-    fread(&byte2,sizeof(unC),1,arquivo);
+    unC byte1 = dados[*index];
+    (*index)++;
+
+    unC byte2 = dados[*index];
+    (*index)++;
 
     //Fazemos operacoes com o byte1 para tirar o lixo que esta nele.
     byte1 = byte1 << 3; //=> SSSSS000.
@@ -59,7 +61,7 @@ void *criarPonteiro(unC byte) {
     return (void*) pointer;
 }
 
-no* readTree(FILE *arquivo, LLi *treeSize){
+no* readTree(unC *dados, LLi *index, LLi *treeSize){
     //Criamos um byte auxiliar e a nossa arvore.
     unC byte;
     no* tree = NULL;
@@ -67,12 +69,18 @@ no* readTree(FILE *arquivo, LLi *treeSize){
     //Criamos uma condicao de parada para a recursao.
     if(*treeSize > 0){
         //Lemos o primeiro byte da arvore e subtraimos um de seu tamanho.
-        fread(&byte,sizeof(unC),1,arquivo);
+        //fread(&byte,sizeof(unC),1,arquivo);
+        byte = dados[*index];
+        (*index)++;
+
         *treeSize -= 1;
         //Se esse byte for '//' o proximo devera ser uma folha.
         if(byte == '\\'){
             //lemos o proximo byte, o que queremos adicionar na arvore e subtraimos um de seu tamanho.
-            fread(&byte,sizeof(unC),1,arquivo);
+            //fread(&byte,sizeof(unC),1,arquivo);
+            byte = dados[*index];
+            (*index)++;
+
             *treeSize -= 1;
 
             //Adcionamos esse no a nosa arvore e retornamos essa arvore.
@@ -85,8 +93,8 @@ no* readTree(FILE *arquivo, LLi *treeSize){
 
         //Caso o byte for um '*', sem antes ter um '//', navegamos primeiramente a esquerda da nosa arvore e depois a direita. De forma recursiva.
         if(byte == '*'){
-            tree->left = readTree(arquivo, treeSize);
-            tree->right = readTree(arquivo, treeSize);
+            tree->left = readTree(dados, index, treeSize);
+            tree->right = readTree(dados, index, treeSize);
         }
 
         return tree;
@@ -95,15 +103,20 @@ no* readTree(FILE *arquivo, LLi *treeSize){
     return tree;
 }
 
-void writeFile(FILE *arquivoIn, FILE *arquivoOut, short int trash, LLi sizeFile, no *tree) {
+void writeFile(unC *dados, LLi *index, FILE *arquivoOut, short int trash, LLi sizeFile, no *tree) {
     //Criamos um byte e uma arvore auxiliar.
     unC byte;
     no *aux = tree;
 
     //Começamos a ler byte a byte indo ate o anterior ao ultimo.
-    for(int i = 0; i <(sizeFile-1); i++) {
+    while(*index < sizeFile - 1){
         //lemos o byte atual.
+        /*fread(&byte, sizeof(unC), 1, arquivoIn);
         fread(&byte, sizeof(unC), 1, arquivoIn);
+
+        fread(&byte, sizeof(unC), 1, arquivoIn);*/
+        byte = dados[*index];
+        (*index)++;
         
         //começamos a ler bit a bit deste byte.
         for(int j = 7; j >= 0; j--) {
@@ -127,6 +140,9 @@ void writeFile(FILE *arquivoIn, FILE *arquivoOut, short int trash, LLi sizeFile,
             //Quando chegamos a uma folha a escrevemos e resetamos a arvore.
             if(aux->right == NULL && aux->left == NULL) {
                 unC *c = (unC*)aux->item; /**/
+                char bin[9];
+                transformandoCoisaEmBinario(*(int*)c, bin, 9);
+                printf("coisa: %s\n");
                 fwrite(c, sizeof(unC), 1, arquivoOut);  
                 aux = tree;
             }
@@ -158,9 +174,9 @@ void imprimirArvore(no *raiz) {
 
     // Imprime o item do nó atual
     if (raiz->item != NULL) {
-        printf("Item: %c\n", *(char*)raiz->item);  // Ajuste conforme o tipo do item
+        printf("%c", *(char*)raiz->item);  // Ajuste conforme o tipo do item
     } else {
-        printf("Item: *\n");  // Nó especial, como o '*' na árvore de Huffman
+        printf("*");  // Nó especial, como o '*' na árvore de Huffman
     }
 
     // Recursivamente imprime os filhos esquerdo e direito
@@ -170,18 +186,27 @@ void imprimirArvore(no *raiz) {
 
 int processoParaDescompactar(char *nomeDoArquivo){
     FILE *arquivo = fopen(nomeDoArquivo, LER_BINARIO);
+    LLi index = 0;
 
     if (arquivo == NULL) {
         return 0;
     }
 
-    LLi lixo = readTrash(arquivo);
+    LLi tamanho = tamanhoDoArquivo(arquivo);
+    printf("Tamanho: %lld\n", tamanho);
 
-    LLi tamanhoArvore = readSizeTree(arquivo);
+    unC *dados = lerArquivo(arquivo, tamanho);
 
-    no *arvore = readTree(arquivo, &tamanhoArvore);
+    LLi lixo = readTrash(dados, &index);
+    //printf("Lixo: %lld, index: %lldd\n", lixo);
 
-    LLi tamanhoArquivo = tamanhoDoArquivo(arquivo);
+    LLi tamanhoArvore = readSizeTree(dados, &index);
+    //printf("Arvre: %lld\n", tamanhoArvore);
+
+    no *arvore = readTree(dados, &index, &tamanhoArvore);
+    //imprimirArvore(arvore);
+
+
 
     char * nomeDoArquivoNovo = calloc(FILENAME_MAX, sizeof(char));
 
@@ -192,13 +217,14 @@ int processoParaDescompactar(char *nomeDoArquivo){
     }
     
     
-    for (int i = 0; i < tam - 4; i++)
+    for (int i = 0; i < strlen(nomeDoArquivo) - 4; i++)
     {
         nomeDoArquivoNovo[i] = nomeDoArquivo[i];
     }
 
+
     FILE *arquivosaida = fopen(nomeDoArquivoNovo, ESCREVER_BINARIO);
 
-    writeFile(arquivo, arquivosaida, lixo, tamanhoArquivo, arvore);
+    writeFile(dados, &index, arquivosaida, lixo, tamanho, arvore);
     return 1;
 }

@@ -1,1 +1,1 @@
-gcc main.c CodeCompac/compactacao.c -o teste
+gcc main.c Code/compactacao.c Code/descompactacao.c -o teste

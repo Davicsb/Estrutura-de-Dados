@@ -226,5 +226,8 @@ int processoParaDescompactar(char *nomeDoArquivo){
     FILE *arquivosaida = fopen(nomeDoArquivoNovo, ESCREVER_BINARIO);
 
     writeFile(dados, &index, arquivosaida, lixo, tamanho, arvore);
+
+    fclose(arquivosaida);
+    fclose(arquivo);
     return 1;
 }

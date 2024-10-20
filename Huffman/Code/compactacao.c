@@ -1,132 +1,7 @@
 #include "compactacao.h"
 
-//---utilidades---
-
-void introducao(){
-    printf("  _    _        __  __                          _____          _ _             \n");
-    printf(" | |  | |      / _|/ _|                        / ____|        | (_)            \n");
-    printf(" | |__| |_   _| |_| |_ _ __ ___   __ _ _ __   | |     ___   __| |_ _ __   __ _ \n");
-    printf(" |  __  | | | |  _|  _| '_ ` _ \\ / _` | '_ \\  | |    / _ \\ / _` | | '_ \\ / _` |\n");
-    printf(" | |  | | |_| | | | | | | | | | | (_| | | | | | |___| (_) | (_| | | | | | (_| |\n");
-    printf(" |_|  |_|\\__,_|_| |_| |_| |_| |_|\\__,_|_| |_|  \\_____\\___/ \\__,_|_|_| |_|\\__, |\n");
-    printf("                                                                          __/ |\n");
-    printf("                                                                         |___/ \n");
-    printf("O que deseja fazer?\n1 - Compactar arquivo\n2 - Descompactar arquivo\n3 - Sair do programa\n> ");
-}
-
-void limpartela(){
-    system("cls");
-}
-
-//retorna NULL como ponteiro para o no
-no* criarListaVazia(){
-    return NULL;
-}
-
-//retorna o maior dos dois itens
-int max(int a, int b){
-    if(a > b){
-        return a;
-    } else {
-        return b;
-    }
-}
-
-//retorna a altura da arvore (o maior caminho da raíz para uma folha) que será o tamanho máximo de um byte do novo alfabeto
-int alturaArvore(no *raiz){
-    if(raiz == NULL){
-        return -1;
-    } else {
-        int left = alturaArvore(raiz->left);
-        int right = alturaArvore(raiz->right);
-
-        return max(left, right) + 1;
-    }
-}
-
-//retorna quantos nós uma arvore tem
-int qntsNos(no *raiz){
-    if(raiz == NULL){
-        return 0;
-    } else {
-        if(raiz->left == NULL && raiz->right == NULL){ // FOLHA
-            if(*(unC*)raiz->item == '*' || *(unC*)raiz->item == '\\'){
-                return qntsNos(raiz->left) + qntsNos(raiz->right) + 2; // mais 2 pra contar o contra barra
-
-            } else {
-                return qntsNos(raiz->left) + qntsNos(raiz->right) + 1;
-
-            }
-        } else {
-            return qntsNos(raiz->left) + qntsNos(raiz->right) + 1;
-
-        }
-    }
-
-}
-
-//faz a pergunta e escaneia o nome do arquivo dado, retornando a string
-char* pegarNomeDoArquivo(){
-    printf("Qual o nome completo do arquivo?\n> ");
-
-    char *nomeArquivo = calloc(FILENAME_MAX, sizeof(char));
-    scanf(" %[^\n]", nomeArquivo);
-
-    return nomeArquivo;
-}
-
-//retorna o tamanho do arquivo
-LLi tamanhoDoArquivo(FILE *arquivo){
-    
-    fseek(arquivo, 0, SEEK_END); //move o ponteiro pro final
-    LLi tamanhoArquivo = ftell(arquivo); //pega o tamanho
-    fseek(arquivo, 0, SEEK_SET); //volta pro começo
-
-    return tamanhoArquivo;
-}
-
-//le os bytes do arquivo e retorna o array dinamico com eles
-unC* lerArquivo(FILE *arquivo, LLi tamanhoArquivo){
-    unC *dados = (unC*) malloc(tamanhoArquivo); // aloca o espaço com base no tamanho do arquivo
-    //checagem de erro
-    if(dados == NULL){
-        printf("Falha na função lerArquivo ao tentar alocar memória para dados.\n");
-        exit(-1);
-    }
-
-    fread(dados, 1, tamanhoArquivo, arquivo); // le o arquivo
-
-    return dados;
-}
-
-//da free em todos os nós e seus respectivos itens e freqs
-void destruirArvore(no *raiz){
-    if(raiz){
-        if(raiz->item){ // se raíz->item != NULL
-            free(raiz->item); //libera o espaço/ponteiro alocado para o void* item
-        }
-
-        if(raiz->freq){ //se raíz->item != NULL
-            free(raiz->freq); //libera o espaço/ponteiro alocado para o void* item
-        }
-
-        destruirArvore(raiz->left);
-        destruirArvore(raiz->right);
-        free(raiz); // libera o espaço/ponteiro do nó atual
-    }
-}
-
-//da free em cada string do dicionario e nele mesmo
-void destruirDicionario(char **dicionario){
-    for(int i = 0; i < TAM; i++){
-        free(dicionario[i]); // free em cada string
-    }
-    free(dicionario); // free nele mesmo
-}
-
-//---
-
-//---debug---
+/*
+// DEBUG
 
 //printa todos os elementos da lista, indicando seu byte em hexadecimal, seu char (se for printavel) e sua frequencia
 void printar(no *head){
@@ -165,25 +40,153 @@ void imprimirDicionario(char **dicionario){
             printf("%3d 0x%02x %s\n", i, i, dicionario[i]);
         }
     }
-}
-
-//printa os bytes do arquivo compactado pra um arquivo txt
+}//printa os bytes do arquivo compactado pra um arquivo txt
 void imprimirDadosNovos(char *dadosNovos){
     FILE* arquivo = fopen("debug.txt", "w");
     fprintf(arquivo, "%s", dadosNovos);
     fclose(arquivo);
 }
+*/
 
-//---
+//---utilidades---
 
-//preenche um array de tamanho 256 com a frequencia de cada byte no arquivo
-void calcFreq(unC *dados, LLi tamanhoArquivo, LLi *freq){
-    for (LLi i = 0; i < tamanhoArquivo; i++) {
-        freq[dados[i]] += 1; // na posição equivalente de dados[i] somamos mais um, exemplo se dados[i] == 'a' então freq[97] += 1
+// Tela inicial do programa
+void introducao(){
+    printf("  _    _        __  __                          _____          _ _             \n");
+    printf(" | |  | |      / _|/ _|                        / ____|        | (_)            \n");
+    printf(" | |__| |_   _| |_| |_ _ __ ___   __ _ _ __   | |     ___   __| |_ _ __   __ _ \n");
+    printf(" |  __  | | | |  _|  _| '_ ` _ \\ / _` | '_ \\  | |    / _ \\ / _` | | '_ \\ / _` |\n");
+    printf(" | |  | | |_| | | | | | | | | | | (_| | | | | | |___| (_) | (_| | | | | | (_| |\n");
+    printf(" |_|  |_|\\__,_|_| |_| |_| |_| |_|\\__,_|_| |_|  \\_____\\___/ \\__,_|_|_| |_|\\__, |\n");
+    printf("                                                                          __/ |\n");
+    printf("                                                                         |___/ \n");
+    printf("O que deseja fazer?\n1 - Compactar arquivo\n2 - Descompactar arquivo\n3 - Sair do programa\n> ");
+}
+
+// Dá um clear no cmd
+void limpartela(){
+    system("cls");
+}
+
+// Retorna NULL como ponteiro para o no
+no* criarListaVazia(){
+    return NULL;
+}
+
+// Retorna o maior dos dois itens
+int max(int a, int b){
+    if(a > b){
+        return a;
+    } else {
+        return b;
     }
 }
 
-//adiciona o nó em uma lista de ordem crescente
+// Retorna a altura da arvore (o maior caminho da raíz para uma folha) que será o tamanho máximo de um byte do novo alfabeto
+int alturaArvore(no *raiz){
+    if(raiz == NULL){
+        return -1;
+    } else {
+        int left = alturaArvore(raiz->left); // Calcula a altura do nó a esquerda
+        int right = alturaArvore(raiz->right); // Calcula a altura do nó a direita
+
+        return max(left, right) + 1; // Vê qual o maior caminho entre a esquerda e direita
+    }
+}
+
+// Retorna quantos nós uma arvore tem
+int qntsNos(no *raiz){
+    if(raiz == NULL){
+        return 0;
+    } else {
+        if(raiz->left == NULL && raiz->right == NULL){ // FOLHA
+            if(*(unC*)raiz->item == '*' || *(unC*)raiz->item == '\\'){
+                return qntsNos(raiz->left) + qntsNos(raiz->right) + 2; // mais 2 pra contar o contra barra
+
+            } else {
+                return qntsNos(raiz->left) + qntsNos(raiz->right) + 1;
+
+            }
+        } else {
+            return qntsNos(raiz->left) + qntsNos(raiz->right) + 1;
+
+        }
+    }
+
+}
+
+// Faz a pergunta e escaneia o nome do arquivo dado, retornando a string
+char* pegarNomeDoArquivo(){
+    printf("Qual o nome completo do arquivo?\n> ");
+
+    char *nomeArquivo = calloc(FILENAME_MAX, sizeof(char));
+    scanf(" %[^\n]", nomeArquivo);
+
+    return nomeArquivo;
+}
+
+// Retorna o tamanho do arquivo
+LLi tamanhoDoArquivo(FILE *arquivo){
+    
+    fseek(arquivo, 0, SEEK_END); //move o ponteiro pro final
+    LLi tamanhoArquivo = ftell(arquivo); //pega o tamanho
+    fseek(arquivo, 0, SEEK_SET); //volta pro começo
+
+    return tamanhoArquivo;
+}
+
+// Lê os bytes do arquivo e retorna o array dinamico com eles
+unC* lerArquivo(FILE *arquivo, LLi tamanhoArquivo){
+    unC *dados = (unC*) malloc(tamanhoArquivo); // aloca o espaço com base no tamanho do arquivo
+
+    //checagem de erro
+    if(dados == NULL){
+        printf("Falha na função lerArquivo ao tentar alocar memória para dados.\n");
+        exit(-1);
+    }
+
+    fread(dados, 1, tamanhoArquivo, arquivo); // le o arquivo
+
+    return dados;
+}
+
+// Dá free em todos os nós e seus respectivos itens e freqs
+void destruirArvore(no *raiz){
+    if(raiz){
+        if(raiz->item){ // se raíz->item != NULL
+            free(raiz->item); //libera o espaço/ponteiro alocado para o void* item
+        }
+
+        if(raiz->freq){ //se raíz->item != NULL
+            free(raiz->freq); //libera o espaço/ponteiro alocado para o void* item
+        }
+
+        destruirArvore(raiz->left);
+        destruirArvore(raiz->right);
+        free(raiz); // libera o espaço/ponteiro do nó atual
+    }
+}
+
+// Dá free em cada string do dicionario e nele mesmo
+void destruirDicionario(char **dicionario){
+    for(int i = 0; i < TAM; i++){
+        free(dicionario[i]); // free em cada string
+    }
+    free(dicionario); // free nele mesmo
+}
+
+//---
+
+// Preenche um array de tamanho 256 com a frequencia de cada byte no arquivo
+void calcFreq(unC *dados, LLi tamanhoArquivo, LLi *freq){
+    for (LLi i = 0; i < tamanhoArquivo; i++) {
+        freq[dados[i]] += 1; // na posição equivalente de dados[i] somamos mais um, exemplo se dados[i] == 'a' então freq[97] += 1
+        // Exemplo ABAA (em byte)
+        // freq[A] ++, freq[B] ++, freq[A] ++, freq[A] ++
+    }
+}
+
+// Adiciona o nó em uma lista de ordem crescente
 no* add(no *head, no *new){
 
     if(head == NULL){ //se a lista estiver vazia
@@ -209,7 +212,7 @@ no* add(no *head, no *new){
 
 }
 
-//vai preencher a lista com a tabela de frequencia
+// Vai preencher a lista com a tabela de frequencia
 no* inserir(LLi freq[TAM]){
     no *head = criarListaVazia();
 
@@ -247,11 +250,11 @@ no* inserir(LLi freq[TAM]){
     return head; //retorna a lista
 }
 
-//---codificar---
+//---CODIFICAR---
 
-//recebe uma lista e a partir de chamadas recursivas ele constroi a arvore de Huffman
-//o processo será juntar os primeiros dois elementos como filhos de um nó e somar suas frequencias, adicionando esse nó de maneira ordenada na lista novamente
-//a recursão acaba quando houver apenas um elemento na lista, que agora será a raíz da arvore
+// Recebe uma lista e a partir de chamadas recursivas ele constroi a arvore de Huffman
+// O processo será juntar os primeiros dois elementos como filhos de um nó e somar suas frequencias, adicionando esse nó de maneira ordenada na lista novamente
+// A recursão acaba quando houver apenas um elemento na lista, que agora será a raíz da arvore
 no* arvore(no* head){
     if(head){
 
@@ -285,7 +288,7 @@ no* arvore(no* head){
     }
 }
 
-//funcionando como o printPreOrdem, apenas colocando cada elemento em uma "string"
+// Funcionando como o printPreOrdem, apenas colocando cada elemento em uma "string"
 void auxArvorePreOrdem(no *head, unC *arvorePre, int *i) {
     if (head != NULL) {
         if (head->left == NULL && head->right == NULL) { // FOLHA
@@ -305,7 +308,7 @@ void auxArvorePreOrdem(no *head, unC *arvorePre, int *i) {
     }
 }
 
-//a função cria um array arvorePre, o preenche com a função auxiliar com os elementos da arvore e o retorna
+// A função cria um array arvorePre, o preenche com a função auxiliar com os elementos da arvore e o retorna
 unC* pegarArvorePreOrdem(no *head){
     unC *arvorePre = (unC*) malloc(qntsNos(head) + 1); // aloca espaço para o arvorePre
     //checagem de erro
@@ -321,7 +324,7 @@ unC* pegarArvorePreOrdem(no *head){
     return arvorePre;
 }
 
-//cria uma matriz de strings dinamicamente usando um inteiro "colunas" que será o maior tamanho possivel de sequencia de 0 e 1 do dicionario novo
+// Cria uma matriz de strings dinamicamente usando um inteiro "colunas" que será o maior tamanho possivel de sequencia de 0 e 1 do dicionario novo
 char** criarDicionarioVazio(int colunas){
     char **dicionario = malloc(sizeof(char*) * TAM); // aloca 256 espaços para ponteiros de char
 
@@ -331,8 +334,8 @@ char** criarDicionarioVazio(int colunas){
     return dicionario; // retorna o dicionario vazio
 }
 
-//vai preencher o dicionario vazio
-//"caminho" será uma string vazia "" no inicio
+// Vai preencher o dicionario vazio
+// "Caminho" será uma string vazia "" no inicio
 void criarDicionarioCompleto(char **dicionario, no *head, char *caminho, int colunas){
     char left[colunas + 1], right[colunas + 1];  // cria duas strings para cada direção
 
@@ -356,7 +359,7 @@ void criarDicionarioCompleto(char **dicionario, no *head, char *caminho, int col
 
 }
 
-//usando o dicionario, cria-se uma string de dados novos onde será salvo a sequencia de 0s e 1s de cada byte codificado de dados
+// Usando o dicionario, cria-se uma string de dados novos onde será salvo a sequencia de 0s e 1s de cada byte codificado de dados
 char* codificar(char **dicionario, unC *dados, LLi tamanhoArquivo) {
     LLi tamanho = 0;
     for (LLi i = 0; i < tamanhoArquivo; i++) {
@@ -386,9 +389,9 @@ char* codificar(char **dicionario, unC *dados, LLi tamanhoArquivo) {
 
 //---
 
-//--compactar--
+// --COMPACTAR--
 
-//transformar um numero coisa em um número binário em uma string bin
+// Transformar um numero coisa em um número binário em uma string bin
 void transformandoCoisaEmBinario(int coisa, char *bin, int tamanhoDeBin){
     for(int i = 0; i < tamanhoDeBin - 1; i++){ // itera até antes do fim da string setando '0' em todas as posições
         bin[i] = '0';
@@ -403,7 +406,7 @@ void transformandoCoisaEmBinario(int coisa, char *bin, int tamanhoDeBin){
     }
 }
 
-//escreve uma string de 0s e 1s como bytes em um arquivo
+// Escreve uma string de 0s e 1s como bytes em um arquivo
 void escreverCoisaEmBinario(FILE* arquivo, char *dados){
     int i = 0, j = 7; // i será o iterador e j será a posição do bit atual
     unsigned char byte = 0; // == 00000000, criação do byte onde as manipulações serão salvas e depois escritas no arquivo
@@ -433,7 +436,7 @@ void escreverCoisaEmBinario(FILE* arquivo, char *dados){
 
 }
 
-//faz os procedimentos para escrever o cabeçario e os dados novos em um arquivo novo
+// Faz os procedimentos para escrever o cabeçario e os dados novos em um arquivo novo
 void compactar(char *dadosNovos, unC *arvorePre, int tamanhoArvorePre, char *nomeOriginal){
     char nomeModificado[strlen(nomeOriginal) + 6]; // cria uma string que vai ser o nome do arquivo de saída, o + 6 é para o .huff
     strcpy(nomeModificado, nomeOriginal); //copia o nome original para o nome modificado
@@ -476,7 +479,7 @@ void compactar(char *dadosNovos, unC *arvorePre, int tamanhoArvorePre, char *nom
 
 //---funções principais---
 
-//função que chama todos os processos para a compactação
+// Função que chama todos os processos para a compactação
 int processoParaCompactar(char *nomeDoArquivo){
 
     FILE *arquivo = fopen(nomeDoArquivo, LER_BINARIO); //pega o ponteiro do arquivo no modo de leitura binaria

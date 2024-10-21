@@ -1,1 +1,1 @@
-gcc testar.c CodeCompac/compactacao.c CUnity/unity.c -o teste
+gcc testar.c Code/compactacao.c Code/descompactacao.c CUnity/unity.c -o teste

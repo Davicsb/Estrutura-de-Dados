@@ -5,6 +5,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <limits.h>
+#include <locale.h>
 
 #define LER_BINARIO "rb" //"Reading Binary"
 #define ESCREVER_BINARIO "ab"

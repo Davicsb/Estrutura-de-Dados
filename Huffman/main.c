@@ -6,6 +6,7 @@ int main() {
     
     while (1)
     {
+        setlocale(LC_ALL, "pt_BR.UTF-8");
         introducao();
 
         int opcao;

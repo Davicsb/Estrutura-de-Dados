@@ -152,7 +152,7 @@ void test_add(){
     // Aloca memória para o item
     newNo->item = malloc(sizeof(unC));
     // Coloca um item para teste
-    newNo->item = "byte";
+    newNo->item = "b";
     // Manda next apontar para nulo
     newNo->next = NULL;
     // Manda o esquerdo apontar para nulo
@@ -166,7 +166,7 @@ void test_add(){
     // A cabeça agora é a lista que tinhamos + o nó criado
     head = add(head, newNo);
     // Teste a saida esperada com o item do nó que acabamos de inserir
-    TEST_ASSERT_EQUAL_STRING("byte", head->item); // Compara strings ("esperado", nossa função)
+    TEST_ASSERT_EQUAL_STRING("b", head->item); // Compara strings ("esperado", nossa função)
 }
 
 // Função que tranforma um inteiro em um array que representa o número em binário
